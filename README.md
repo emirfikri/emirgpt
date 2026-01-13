@@ -73,6 +73,7 @@ NPM/Yarn
 OpenAI API key
 
 Frontend (Flutter Web)
+```
 # Clone repo
 git clone https://github.com/yourusername/emirgpt.git
 cd emirgpt
@@ -82,8 +83,10 @@ flutter pub get
 
 # Run web app
 flutter run -d chrome
+```
 
 Backend (Next.js API Gateway)
+```
 # Navigate to backend folder
 cd emirgpt-backend
 
@@ -94,14 +97,14 @@ npm install
 export OPENAI_API_KEY="your_openai_key"  # Windows: setx OPENAI_API_KEY "your_key"
 
 # Run development server
-```
+
 npm run dev
 ```
 
 API Endpoint example:
-
-POST http://localhost:3000/api/ai/chat
 ```
+POST http://localhost:3000/api/ai/chat
+
 {
     "message": "Hello AI"
 }
