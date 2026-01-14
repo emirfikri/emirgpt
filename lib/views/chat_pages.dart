@@ -129,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
                               : CrossAxisAlignment.start,
                           children: [
                             isUser
-                                ? Text(
+                                ? SelectableText(
                                     msg.text,
                                     style: const TextStyle(color: Colors.white),
                                   )

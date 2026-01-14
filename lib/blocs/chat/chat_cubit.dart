@@ -28,16 +28,22 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final fullResponse = await repository.sendMessage(text);
 
+      const int chunkSize = 10;
+      const Duration frameDelay = Duration(milliseconds: 2);
       String buffer = '';
 
-      for (int i = 0; i < fullResponse.length; i++) {
-        buffer += fullResponse[i];
+      for (int i = 0; i < fullResponse.length; i += chunkSize) {
+        buffer += fullResponse.substring(
+          i,
+          (i + chunkSize).clamp(0, fullResponse.length),
+        );
 
         updatedMessages[updatedMessages.length - 1] = updatedMessages.last
             .copyWith(text: buffer);
         ChatStorage.save(updatedMessages);
         emit(ChatStreaming(List.from(updatedMessages)));
-        await Future.delayed(const Duration(milliseconds: 18));
+
+        await Future.delayed(frameDelay);
       }
       emit(ChatSuccess(updatedMessages));
     } catch (e) {
