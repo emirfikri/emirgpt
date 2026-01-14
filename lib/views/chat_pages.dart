@@ -1,4 +1,6 @@
+import 'package:emirgpt/core/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -15,13 +17,15 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:'
-        '${time.minute.toString().padLeft(2, '0')}';
-  }
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('EmirGPT'),
@@ -104,52 +108,82 @@ class _ChatPageState extends State<ChatPage> {
                   }
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    final isUser = msg.isUser;
-
-                    return Align(
-                      alignment: isUser
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        padding: const EdgeInsets.all(12),
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        decoration: BoxDecoration(
-                          color: isUser ? Colors.blue : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isUser
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            isUser
-                                ? SelectableText(
-                                    msg.text,
-                                    style: const TextStyle(color: Colors.white),
-                                  )
-                                : MarkdownBody(
-                                    data: msg.text,
-                                    selectable: true,
-                                  ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatTime(msg.timestamp),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isUser ? Colors.white70 : Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                return BlocListener<ChatCubit, ChatState>(
+                  listener: (context, state) {
+                    if (_scrollController.hasClients) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      });
+                    }
                   },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      final isUser = msg.isUser;
+
+                      return Align(
+                        alignment: isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          padding: const EdgeInsets.all(12),
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          decoration: BoxDecoration(
+                            color: isUser ? Colors.blue : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isUser
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              // if (!msg.isUser)
+                              //   Align(
+                              //     alignment: Alignment.topRight,
+                              //     child: IconButton(
+                              //       icon: const Icon(Icons.copy, size: 16),
+                              //       onPressed: () {
+                              //         Clipboard.setData(
+                              //           ClipboardData(text: msg.text),
+                              //         );
+                              //       },
+                              //     ),
+                              //   ),
+                              isUser
+                                  ? SelectableText(
+                                      msg.text,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : MarkdownBody(
+                                      data: msg.text,
+                                      selectable: true,
+                                    ),
+                              const SizedBox(height: 4),
+                              Text(
+                                Helpers.formatTime(msg.timestamp),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isUser
+                                      ? Colors.white70
+                                      : Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -197,63 +231,82 @@ class _ChatPageState extends State<ChatPage> {
           ),
 
           /// Input box
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  final isLoading = state is ChatLoading;
+          BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              final isEmpty = state.messages.isEmpty;
 
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxHeight: 150, // Maximum height for input
-                          ),
-                          child: Scrollbar(
-                            child: TextField(
-                              controller: _controller,
-                              enabled: !isLoading,
-                              maxLines: null, // allow multiple lines
-                              minLines: 1,
-                              keyboardType: TextInputType.multiline,
-                              textInputAction: TextInputAction.newline,
-                              decoration: InputDecoration(
-                                hintText: 'Ask something...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                final text = _controller.text.trim();
-                                if (text.isNotEmpty) {
-                                  context.read<ChatCubit>().sendMessage(text);
-                                  _controller.clear();
-                                }
-                              },
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+              if (isEmpty) {
+                // CENTER input
+                return Expanded(
+                  child: Center(
+                    child: SizedBox(width: 800, child: _buildInputBar(context)),
+                  ),
+                );
+              }
+
+              // BOTTOM input
+              return SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: _buildInputBar(context),
+                ),
+              );
+            },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInputBar(BuildContext context) {
+    final isLoading = context.watch<ChatCubit>().state is ChatLoading;
+
+    return Row(
+      children: [
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40, maxHeight: 150),
+            child: RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: (event) {
+                if (event is RawKeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.enter &&
+                    !event.isShiftPressed) {
+                  final text = _controller.text.trim();
+                  if (text.isNotEmpty) {
+                    context.read<ChatCubit>().sendMessage(text);
+                    Future.delayed(Duration.zero, () => _controller.clear());
+                  }
+                }
+              },
+              child: TextField(
+                controller: _controller,
+                enabled: !isLoading,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: 'Ask something...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.send),
+          onPressed: isLoading
+              ? null
+              : () {
+                  final text = _controller.text.trim();
+                  if (text.isNotEmpty) {
+                    context.read<ChatCubit>().sendMessage(text);
+                    _controller.clear();
+                  }
+                },
+        ),
+      ],
     );
   }
 }
