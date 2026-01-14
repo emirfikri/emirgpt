@@ -64,5 +64,10 @@ class ChatCubit extends Cubit<ChatState> {
     emit(ChatInitial());
   }
 
-  void retry() {}
+  void retry() {
+    if (state.messages.isNotEmpty) {
+      final lastUserMessage = state.messages.lastWhere((m) => m.isUser).text;
+      sendMessage(lastUserMessage);
+    }
+  }
 }
