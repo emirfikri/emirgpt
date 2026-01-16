@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:go_router/go_router.dart';
 
 import '../blocs/export_blocs.dart';
 import 'widgets/promptChip.dart';
@@ -28,7 +29,12 @@ class _ChatPageState extends State<ChatPage> {
     });
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EmirGPT'),
+        title: GestureDetector(
+          onTap: () {
+            context.go('/resume-matcher');
+          },
+          child: const Text('EmirGPT'),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
