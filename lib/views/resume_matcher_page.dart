@@ -105,7 +105,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                                     lineWidth: 12.0,
                                     percent:
                                         (jsonData['matchScore'] as num) / 100,
-                                    center: Text(
+                                    center: SelectableText(
                                       "${jsonData['matchScore']}%",
                                       style: const TextStyle(
                                         fontSize: 20,
@@ -125,7 +125,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                                 const SizedBox(height: 16),
                                 const SizedBox(height: 12),
                                 if (jsonData['matchedSkills'] != null) ...[
-                                  const Text(
+                                  const SelectableText(
                                     'Matched Skills:',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -135,13 +135,13 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                                   const SizedBox(height: 6),
                                   ...List<Widget>.from(
                                     (jsonData['matchedSkills'] as List).map(
-                                      (e) => Text('• $e'),
+                                      (e) => SelectableText('• $e'),
                                     ),
                                   ),
                                   const SizedBox(height: 12),
                                 ],
                                 if (jsonData['missingSkills'] != null) ...[
-                                  const Text(
+                                  const SelectableText(
                                     'Missing Skills:',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -151,14 +151,14 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                                   const SizedBox(height: 6),
                                   ...List<Widget>.from(
                                     (jsonData['missingSkills'] as List).map(
-                                      (e) => Text('• $e'),
+                                      (e) => SelectableText('• $e'),
                                     ),
                                   ),
                                   const SizedBox(height: 12),
                                 ],
                                 if (jsonData['improvementSuggestions'] !=
                                     null) ...[
-                                  const Text(
+                                  const SelectableText(
                                     'Improvement Suggestions:',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -168,7 +168,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                                   const SizedBox(height: 6),
                                   ...List<Widget>.from(
                                     (jsonData['improvementSuggestions'] as List)
-                                        .map((e) => Text('• $e')),
+                                        .map((e) => SelectableText('• $e')),
                                   ),
                                 ],
                               ],
@@ -178,14 +178,14 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                       }
 
                       if (state is ResumeMatcherError) {
-                        return Text(
+                        return SelectableText(
                           state.message,
                           style: const TextStyle(color: Colors.red),
                         );
                       }
 
                       return const Center(
-                        child: Text(
+                        child: SelectableText(
                           'Paste resume and Job Title & description to begin',
                         ),
                       );
