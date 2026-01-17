@@ -5,7 +5,6 @@ import 'blocs/export_blocs.dart';
 import 'core/app_router.dart';
 import 'core/network/export_api.dart';
 import 'repository/export_repository.dart';
-import 'views/export_pages.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() {
