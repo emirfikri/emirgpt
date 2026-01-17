@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../blocs/export_blocs.dart';
 import 'widgets/promptChip.dart';
+import 'widgets/thinking_indicator.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -92,9 +93,10 @@ class _ChatPageState extends State<ChatPage> {
                                 text: 'What is this AI Architecture is using?',
                                 onTap: () {
                                   context.read<ChatCubit>().sendMessage(
-                                    'Im using flutter for frontend, and api gateway for backend is using nextJS.'
-                                    'This flutter app is connected to the backend using REST API'
-                                    'The gateway handles API key security, prompt construction, error handling, and provider abstraction. This ensures the frontend stays lightweight and secure',
+                                    'The frontend is built with Flutter and communicates with the backend via REST APIs.'
+                                    'The backend is implemented as a Next.js API gateway that acts as a secure intermediary between the client and AI providers.'
+                                    'This gateway is responsible for API key management, prompt construction, request validation, error handling, and AI provider abstraction.'
+                                    'By centralizing this logic on the backend, the frontend remains lightweight, secure, and provider-agnostic, while enabling flexibility to swap or scale AI providers without client changes.',
                                   );
                                 },
                               ),
@@ -133,6 +135,7 @@ class _ChatPageState extends State<ChatPage> {
                     itemBuilder: (context, index) {
                       final msg = messages[index];
                       final isUser = msg.isUser;
+                      final isThinking = msg.isThinking;
 
                       return Align(
                         alignment: isUser
@@ -151,18 +154,6 @@ class _ChatPageState extends State<ChatPage> {
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
-                              // if (!msg.isUser)
-                              //   Align(
-                              //     alignment: Alignment.topRight,
-                              //     child: IconButton(
-                              //       icon: const Icon(Icons.copy, size: 16),
-                              //       onPressed: () {
-                              //         Clipboard.setData(
-                              //           ClipboardData(text: msg.text),
-                              //         );
-                              //       },
-                              //     ),
-                              //   ),
                               isUser
                                   ? SelectableText(
                                       msg.text,
@@ -170,20 +161,47 @@ class _ChatPageState extends State<ChatPage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : MarkdownBody(
-                                      data: msg.text,
-                                      selectable: true,
+                                  : isThinking
+                                  ? thinkingIndicator()
+                                  : Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.copy,
+                                            size: 16,
+                                          ),
+                                          onPressed: () {
+                                            Clipboard.setData(
+                                              ClipboardData(text: msg.text),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: MarkdownBody(
+                                            data: msg.text,
+                                            selectable: true,
+                                            styleSheet: MarkdownStyleSheet(
+                                              p: const TextStyle(fontSize: 14),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                               const SizedBox(height: 4),
-                              Text(
-                                Helpers.formatTime(msg.timestamp),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isUser
-                                      ? Colors.white70
-                                      : Colors.black54,
-                                ),
-                              ),
+                              isThinking
+                                  ? const SizedBox.shrink()
+                                  : Text(
+                                      Helpers.formatTime(msg.timestamp),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: isUser
+                                            ? Colors.white70
+                                            : Colors.black54,
+                                      ),
+                                    ),
                             ],
                           ),
                         ),

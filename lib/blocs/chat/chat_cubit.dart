@@ -20,15 +20,21 @@ class ChatCubit extends Cubit<ChatState> {
     final updatedMessages = List<ChatMessage>.from(state.messages)
       ..add(ChatMessage(text: text, isUser: true, timestamp: now))
       ..add(
-        ChatMessage(text: '', isUser: false, timestamp: now),
-      ); // 👈 placeholder AI message
+        ChatMessage(
+          text: '',
+          isUser: false,
+          timestamp: now,
+          isThinking: true, // 👈 START THINKING
+        ),
+      );
 
     emit(ChatStreaming(updatedMessages));
     ChatStorage.save(updatedMessages);
+
     try {
       final fullResponse = await repository.sendMessage(text);
 
-      const int chunkSize = 10;
+      const int chunkSize = 20;
       const Duration frameDelay = Duration(milliseconds: 2);
       String buffer = '';
 
@@ -39,15 +45,20 @@ class ChatCubit extends Cubit<ChatState> {
         );
 
         updatedMessages[updatedMessages.length - 1] = updatedMessages.last
-            .copyWith(text: buffer);
+            .copyWith(
+              text: buffer,
+              isThinking: false, // 👈 STOP THINKING ON FIRST CHUNK
+            );
+
         ChatStorage.save(updatedMessages);
         emit(ChatStreaming(List.from(updatedMessages)));
 
         await Future.delayed(frameDelay);
       }
+
       emit(ChatSuccess(updatedMessages));
     } catch (e) {
-      updatedMessages.removeLast(); // remove AI placeholder
+      updatedMessages.removeLast();
       emit(ChatError('Failed to get AI response', updatedMessages));
     }
   }
