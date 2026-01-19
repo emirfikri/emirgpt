@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TypingDots extends StatefulWidget {
-  const TypingDots({super.key});
+  const TypingDots({super.key, this.text});
+  final String? text;
 
   @override
   State<TypingDots> createState() => _TypingDotsState();
@@ -33,7 +34,7 @@ class _TypingDotsState extends State<TypingDots>
       builder: (_, __) {
         final count = (_controller.value * 3).floor() + 1;
         return Text(
-          'Thinking${'.' * count}',
+          '${widget.text ?? 'Thinking'}${'.' * count}',
           style: const TextStyle(
             fontSize: 12,
             fontStyle: FontStyle.italic,
