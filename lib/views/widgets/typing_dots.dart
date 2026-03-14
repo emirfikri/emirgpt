@@ -31,7 +31,7 @@ class _TypingDotsState extends State<TypingDots>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) {
+      builder: (_, _) {
         final count = (_controller.value * 3).floor() + 1;
         return Text(
           '${widget.text ?? 'Thinking'}${'.' * count}',
