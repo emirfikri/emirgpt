@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../blocs/export_blocs.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
+import 'widgets/thinking_indicator.dart';
+
 class ResumeMatcherPage extends StatefulWidget {
   const ResumeMatcherPage({super.key});
 
@@ -202,7 +204,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
               if (state is ResumeMatcherLoading) {
                 return Container(
                   color: Colors.black.withOpacity(0.3),
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: Center(child: thinkingIndicator(text: 'Analyzing')),
                 );
               }
               return const SizedBox.shrink();
