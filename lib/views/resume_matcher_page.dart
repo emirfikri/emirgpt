@@ -25,7 +25,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            context.go('/');
+            context.go('/booking');
           },
           child: const Text('Resume / JD Matcher'),
         ),

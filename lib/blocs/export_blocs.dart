@@ -1,4 +1,7 @@
+export 'package:flutter_bloc/flutter_bloc.dart';
 export 'chat/chat_state.dart';
 export 'chat/chat_cubit.dart';
+export 'booking/booking_state.dart';
+export 'booking/booking_cubit.dart';
 export 'resume/resume_matcher_cubit.dart';
 export 'resume/resume_matcher_state.dart';

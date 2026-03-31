@@ -5,7 +5,7 @@ import 'package:shimmer/shimmer.dart';
 Widget thinkingIndicator({String? text}) {
   return Shimmer.fromColors(
     baseColor: Colors.blueAccent.shade400,
-    highlightColor: Colors.blueGrey.shade100,
+    highlightColor: Colors.blueAccent.shade700,
     child: TypingDots(text: text),
   );
 }

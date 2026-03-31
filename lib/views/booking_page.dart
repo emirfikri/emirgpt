@@ -9,16 +9,15 @@ import '../blocs/export_blocs.dart';
 import 'widgets/promptChip.dart';
 import 'widgets/thinking_indicator.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+class BookingPage extends StatefulWidget {
+  const BookingPage({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<BookingPage> createState() => _BookingPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _BookingPageState extends State<BookingPage> {
   final TextEditingController _controller = TextEditingController();
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -28,101 +27,88 @@ class _ChatPageState extends State<ChatPage> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
+
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            context.go('/booking');
-          },
-          child: const Text('Booking'),
-        ),
         title: GestureDetector(
           onTap: () {
-            context.go('/resume-matcher');
+            context.go('/');
           },
-          child: const Text('EmirGPT'),
+          child: const Text('BookingGPT'),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () {
-              context.read<ChatCubit>().clearHistory();
+              context.read<BookingCubit>().clearHistory();
             },
           ),
         ],
       ),
       body: Column(
         children: [
-          /// Chat messages
           Expanded(
-            child: BlocBuilder<ChatCubit, ChatState>(
+            child: BlocBuilder<BookingCubit, BookingChatState>(
               builder: (context, state) {
                 final messages = state.messages;
 
                 if (messages.isEmpty) {
-                  if (messages.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'EmirGPT',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'BookingGPT',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Ask for venue availability, price, and schedule',
+                          style: TextStyle(fontSize: 18, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 32),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            PromptChip(
+                              text:
+                                  'Book me badminton courts for tommorrow 5pm',
+                              onTap: () {
+                                context.read<BookingCubit>().sendMessage(
+                                  'Book me badminton courts for tommorrow 5pm',
+                                );
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'How can I help you today?',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.black54,
+                            PromptChip(
+                              text:
+                                  'How is my data Process for using this app ?',
+                              onTap: () {
+                                context.read<BookingCubit>().sendMessage(
+                                  'How is my data Process for using this app ?',
+                                );
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              PromptChip(
-                                text: 'Explain AI Gateway architecture',
-                                onTap: () {
-                                  context.read<ChatCubit>().sendMessage(
-                                    'Explain AI Gateway architecture',
-                                  );
-                                },
-                              ),
-                              PromptChip(
-                                text: 'What is this AI Architecture is using?',
-                                onTap: () {
-                                  context.read<ChatCubit>().sendMessage(
-                                    'The frontend is built with Flutter and communicates with the backend via REST APIs.'
-                                    'The backend is implemented as a Next.js API gateway that acts as a secure intermediary between the client and AI providers.'
-                                    'This gateway is responsible for API key management, prompt construction, request validation, error handling, and AI provider abstraction.'
-                                    'By centralizing this logic on the backend, the frontend remains lightweight, secure, and provider-agnostic, while enabling flexibility to swap or scale AI providers without client changes.',
-                                  );
-                                },
-                              ),
-                              PromptChip(
-                                text: 'Optimize REST API performance',
-                                onTap: () {
-                                  context.read<ChatCubit>().sendMessage(
-                                    'Optimize REST API performance',
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                            PromptChip(
+                              text: 'Book me a tennis court in next hour',
+                              onTap: () {
+                                context.read<BookingCubit>().sendMessage(
+                                  'Book me a tennis court in next hour',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
-                return BlocListener<ChatCubit, ChatState>(
+                return BlocListener<BookingCubit, BookingChatState>(
                   listener: (context, state) {
                     if (_scrollController.hasClients) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -187,6 +173,8 @@ class _ChatPageState extends State<ChatPage> {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: MarkdownBody(
+                                            onTapLink: (text, href, title) =>
+                                                Helpers.openLink(href),
                                             data: msg.text,
                                             selectable: true,
                                             styleSheet: MarkdownStyleSheet(
@@ -219,10 +207,9 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
 
-          /// Error + Retry
-          BlocBuilder<ChatCubit, ChatState>(
+          BlocBuilder<BookingCubit, BookingChatState>(
             builder: (context, state) {
-              if (state is ChatError) {
+              if (state is BookingError) {
                 return Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
@@ -235,7 +222,7 @@ class _ChatPageState extends State<ChatPage> {
                       const SizedBox(width: 8),
                       TextButton(
                         onPressed: () {
-                          context.read<ChatCubit>().retry();
+                          context.read<BookingCubit>().retry();
                         },
                         child: const Text('Retry'),
                       ),
@@ -247,10 +234,9 @@ class _ChatPageState extends State<ChatPage> {
             },
           ),
 
-          /// Loading indicator
-          BlocBuilder<ChatCubit, ChatState>(
+          BlocBuilder<BookingCubit, BookingChatState>(
             builder: (context, state) {
-              if (state is ChatLoading) {
+              if (state is BookingLoading) {
                 return const Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: CircularProgressIndicator(),
@@ -260,13 +246,11 @@ class _ChatPageState extends State<ChatPage> {
             },
           ),
 
-          /// Input box
-          BlocBuilder<ChatCubit, ChatState>(
+          BlocBuilder<BookingCubit, BookingChatState>(
             builder: (context, state) {
               final isEmpty = state.messages.isEmpty;
 
               if (isEmpty) {
-                // CENTER input
                 return Expanded(
                   child: Center(
                     child: SizedBox(width: 800, child: _buildInputBar(context)),
@@ -274,7 +258,6 @@ class _ChatPageState extends State<ChatPage> {
                 );
               }
 
-              // BOTTOM input
               return SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -289,7 +272,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildInputBar(BuildContext context) {
-    final isLoading = context.watch<ChatCubit>().state is ChatLoading;
+    final isLoading = context.watch<BookingCubit>().state is BookingLoading;
 
     return Row(
       children: [
@@ -304,7 +287,7 @@ class _ChatPageState extends State<ChatPage> {
                     !event.isShiftPressed) {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
-                    context.read<ChatCubit>().sendMessage(text);
+                    context.read<BookingCubit>().sendMessage(text);
                     Future.delayed(Duration.zero, () => _controller.clear());
                   }
                 }
@@ -314,7 +297,7 @@ class _ChatPageState extends State<ChatPage> {
                 enabled: !isLoading,
                 maxLines: null,
                 decoration: const InputDecoration(
-                  hintText: 'Ask something...',
+                  hintText: 'Ask about venue booking...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20)),
                   ),
@@ -331,7 +314,7 @@ class _ChatPageState extends State<ChatPage> {
               : () {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
-                    context.read<ChatCubit>().sendMessage(text);
+                    context.read<BookingCubit>().sendMessage(text);
                     _controller.clear();
                   }
                 },

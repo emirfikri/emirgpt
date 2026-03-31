@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'blocs/export_blocs.dart';
 import 'core/app_router.dart';
 import 'core/network/export_api.dart';
@@ -21,6 +19,11 @@ class MyApp extends StatelessWidget {
       providers: [
         /// EmirGPT Chat
         BlocProvider(create: (_) => ChatCubit(ChatRepository(ApiClient()))),
+
+        /// Booking Venue
+        BlocProvider(
+          create: (_) => BookingCubit(BookingRepository(BookingApiClient())),
+        ),
 
         /// Resume Matcher
         BlocProvider(
