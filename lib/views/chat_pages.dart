@@ -6,7 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/export_blocs.dart';
-import 'widgets/promptChip.dart';
+import 'widgets/prompt_chip.dart';
 import 'widgets/thinking_indicator.dart';
 
 class ChatPage extends StatefulWidget {
@@ -296,12 +296,12 @@ class _ChatPageState extends State<ChatPage> {
         Expanded(
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 40, maxHeight: 150),
-            child: RawKeyboardListener(
+            child: KeyboardListener(
               focusNode: FocusNode(),
-              onKey: (event) {
-                if (event is RawKeyDownEvent &&
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.enter &&
-                    !event.isShiftPressed) {
+                    HardwareKeyboard.instance.isShiftPressed) {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
                     context.read<ChatCubit>().sendMessage(text);

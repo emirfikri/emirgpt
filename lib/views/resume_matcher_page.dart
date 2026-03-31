@@ -80,9 +80,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
                         //   child: SelectableText(state.result),
                         // );
                         // Parse JSON string to Map
-                        final jsonData = state.result is String
-                            ? jsonDecode(state.result)
-                            : state.result;
+                        final jsonData = jsonDecode(state.result);
 
                         return SingleChildScrollView(
                           child: Container(
@@ -203,7 +201,7 @@ class _ResumeMatcherPageState extends State<ResumeMatcherPage> {
             builder: (context, state) {
               if (state is ResumeMatcherLoading) {
                 return Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   child: Center(child: thinkingIndicator(text: 'Analyzing')),
                 );
               }
