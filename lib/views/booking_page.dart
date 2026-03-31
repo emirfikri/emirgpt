@@ -1,12 +1,11 @@
 import 'package:emirgpt/core/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/export_blocs.dart';
-import 'widgets/promptChip.dart';
+import 'widgets/prompt_chip.dart';
 import 'widgets/thinking_indicator.dart';
 
 class BookingPage extends StatefulWidget {
