@@ -8,7 +8,7 @@ class BookingAiReplyRaw {
 
   Map<String, dynamic> toJson() => {
     'reply': reply.toJson(),
-    'venuePromptConfirmation': venuePromptConfirmation?.toJson() ?? {},
+    'venuePromptConfirmation': venuePromptConfirmation?.toJson(),
   };
 
   factory BookingAiReplyRaw.fromJson(Map<String, dynamic> json) {

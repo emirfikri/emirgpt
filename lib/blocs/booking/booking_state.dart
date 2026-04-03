@@ -27,3 +27,9 @@ class BookingStreaming extends BookingChatState {
 
   BookingStreaming(this.messages) : super(messages);
 }
+
+class UpdateMessages extends BookingChatState {
+  final List<ChatMessage> messages;
+
+  UpdateMessages(this.messages) : super(messages);
+}

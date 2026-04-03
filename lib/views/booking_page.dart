@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/export_blocs.dart';
+import 'widgets/booking_summary_card.dart';
 import 'widgets/prompt_chip.dart';
 import 'widgets/thinking_indicator.dart';
 
@@ -93,10 +94,10 @@ class _BookingPageState extends State<BookingPage> {
                               },
                             ),
                             PromptChip(
-                              text: 'Book me a tennis court in next hour',
+                              text: 'Book me a futsal court in next hour',
                               onTap: () {
                                 context.read<BookingCubit>().sendMessage(
-                                  'Book me a tennis court in next hour',
+                                  'Book me a futsal court in next hour',
                                 );
                               },
                             ),
@@ -127,6 +128,7 @@ class _BookingPageState extends State<BookingPage> {
                       final msg = messages[index];
                       final isUser = msg.isUser;
                       final isThinking = msg.isThinking;
+                      final replyRaw = msg.replyRaw;
 
                       return Align(
                         alignment: isUser
@@ -154,6 +156,79 @@ class _BookingPageState extends State<BookingPage> {
                                     )
                                   : isThinking
                                   ? thinkingIndicator()
+                                  : replyRaw?.venuePromptConfirmation != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 0,
+                                        top: 8,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          BookingSummaryCard(
+                                            venuePromptConfirmation: replyRaw!
+                                                .venuePromptConfirmation!,
+                                            isAnswered: msg.isAnswered,
+                                          ),
+                                          if (!msg.isAnswered &&
+                                              messages.last == msg)
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                left: 40,
+                                                top: 8,
+                                              ),
+                                              child: Wrap(
+                                                spacing: 8,
+                                                runSpacing: 4,
+                                                children: [
+                                                  ElevatedButton(
+                                                    style:
+                                                        ElevatedButton.styleFrom(
+                                                          backgroundColor:
+                                                              Colors.green,
+                                                          foregroundColor:
+                                                              Colors.white,
+                                                        ),
+                                                    onPressed: () {
+                                                      context
+                                                          .read<BookingCubit>()
+                                                          .sendConfirmBooking(
+                                                            replyRaw
+                                                                .venuePromptConfirmation!,
+                                                          );
+                                                      context
+                                                          .read<BookingCubit>()
+                                                          .updateMessagesIndex(
+                                                            index,
+                                                          );
+                                                      // Handle confirm action
+                                                    },
+                                                    child: const Text(
+                                                      'Confirm',
+                                                    ),
+                                                  ),
+                                                  OutlinedButton(
+                                                    style:
+                                                        OutlinedButton.styleFrom(
+                                                          backgroundColor:
+                                                              Colors.redAccent,
+                                                          foregroundColor:
+                                                              Colors.white,
+                                                        ),
+                                                    onPressed: () {
+                                                      context
+                                                          .read<BookingCubit>()
+                                                          .updateMessagesIndex(
+                                                            index,
+                                                          );
+                                                    },
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    )
                                   : Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,

@@ -10,4 +10,10 @@ class BookingRepository {
   Future<BookingAiReplyRaw> sendMessage(String message) {
     return bookingApiClient.sendMessage(message);
   }
+
+  Future<BookingConfirmResponse> sendConfirmBooking(
+    VenuePromptConfirmation venuePromptConfirmation,
+  ) {
+    return bookingApiClient.sendConfirmBooking(venuePromptConfirmation);
+  }
 }

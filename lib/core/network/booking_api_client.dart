@@ -16,6 +16,32 @@ class BookingApiClient {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
+    print(' BookingApiClient sendMessage response data: $data');
     return BookingAiReplyRaw.fromJson(data);
+  }
+
+  Future<BookingConfirmResponse> sendConfirmBooking(
+    VenuePromptConfirmation venuePromptConfirmation,
+  ) async {
+    late final http.Response response;
+    try {
+      response = await http.post(
+        Uri.parse('$_baseUrl/api/booking/book-confirm'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(venuePromptConfirmation.toJson()),
+      );
+    } catch (e) {
+      throw Exception(
+        'Failed to fetch booking confirm: $e (uri=$_baseUrl/api/booking/book-confirm)',
+      );
+    }
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to confirm booking ${response.statusCode}: ${response.body}',
+      );
+    }
+
+    final data = BookingConfirmResponse.fromJson(jsonDecode(response.body));
+    return data;
   }
 }

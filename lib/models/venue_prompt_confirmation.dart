@@ -7,6 +7,7 @@ class VenuePromptConfirmation {
   final DateTime startDate;
   final DateTime endDate;
   final String status;
+  final int pricePerHour;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? notes;
@@ -23,6 +24,7 @@ class VenuePromptConfirmation {
     required this.createdAt,
     required this.updatedAt,
     required this.notes,
+    required this.pricePerHour,
   });
 
   factory VenuePromptConfirmation.fromJson(Map<String, dynamic> json) {
@@ -32,12 +34,21 @@ class VenuePromptConfirmation {
       userName: json['userName'] ?? '',
       venueId: json['venueId'] ?? '',
       venueName: json['venueName'] ?? '',
-      startDate: DateTime.parse(json['startDate']),
-      endDate: DateTime.parse(json['endDate']),
+      startDate: json['startDate'] != null
+          ? DateTime.parse(json['startDate'] as String)
+          : DateTime.now(),
+      endDate: json['endDate'] != null
+          ? DateTime.parse(json['endDate'] as String)
+          : DateTime.now().add(const Duration(hours: 1)),
       status: json['status'] ?? '',
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
       notes: json['notes'] ?? '',
+      pricePerHour: json['pricePerHour'] ?? 10,
     );
   }
 
@@ -54,6 +65,7 @@ class VenuePromptConfirmation {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'notes': notes,
+      'pricePerHour': pricePerHour,
     };
   }
 
@@ -69,6 +81,7 @@ class VenuePromptConfirmation {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? notes,
+    int? pricePerHour,
   }) {
     return VenuePromptConfirmation(
       id: id ?? this.id,
@@ -82,6 +95,7 @@ class VenuePromptConfirmation {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       notes: notes ?? this.notes,
+      pricePerHour: pricePerHour ?? this.pricePerHour,
     );
   }
 }

@@ -5,3 +5,5 @@ export 'booking/booking_state.dart';
 export 'booking/booking_cubit.dart';
 export 'resume/resume_matcher_cubit.dart';
 export 'resume/resume_matcher_state.dart';
+export 'home/home_cubit.dart';
+export 'home/home_state.dart';

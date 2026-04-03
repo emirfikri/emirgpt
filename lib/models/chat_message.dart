@@ -1,14 +1,20 @@
+import 'package:emirgpt/models/booking_ai_reply_raw.dart';
+
 class ChatMessage {
   final String text;
   final bool isUser;
   final DateTime timestamp;
   final bool isThinking;
+  final bool isAnswered;
+  final BookingAiReplyRaw? replyRaw;
 
   ChatMessage({
     required this.text,
     required this.isUser,
     required this.timestamp,
     this.isThinking = false,
+    this.isAnswered = false,
+    this.replyRaw,
   });
 
   Map<String, dynamic> toJson() => {
@@ -16,14 +22,22 @@ class ChatMessage {
     'isUser': isUser,
     'timestamp': timestamp.toIso8601String(),
     'isThinking': isThinking,
+    'isAnswered': isAnswered,
+    'replyRaw': replyRaw?.toJson(),
   };
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      text: json['text'],
-      isUser: json['isUser'],
-      timestamp: DateTime.parse(json['timestamp']),
+      text: json['text'] ?? '',
+      isUser: json['isUser'] ?? false,
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : DateTime.now(),
       isThinking: json['isThinking'] ?? false,
+      isAnswered: json['isAnswered'] ?? false,
+      replyRaw: json['replyRaw'] != null
+          ? BookingAiReplyRaw.fromJson(json['replyRaw'])
+          : null,
     );
   }
 
@@ -32,12 +46,16 @@ class ChatMessage {
     bool? isUser,
     DateTime? timestamp,
     bool? isThinking,
+    bool? isAnswered,
+    BookingAiReplyRaw? replyRaw,
   }) {
     return ChatMessage(
       text: text ?? this.text,
       isUser: isUser ?? this.isUser,
       timestamp: timestamp ?? this.timestamp,
       isThinking: isThinking ?? this.isThinking,
+      isAnswered: isAnswered ?? this.isAnswered,
+      replyRaw: replyRaw ?? this.replyRaw,
     );
   }
 }
