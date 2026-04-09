@@ -15,7 +15,14 @@ class BookingStorage {
     if (data == null) return [];
 
     final decoded = jsonDecode(data) as List;
-    return decoded.map((e) => ChatMessage.fromJson(e)).toList();
+    return decoded.map((e) {
+      try {
+        return ChatMessage.fromJson(e);
+      } catch (error) {
+        // Skip invalid messages to prevent crashes
+        return null;
+      }
+    }).where((msg) => msg != null).cast<ChatMessage>().toList();
   }
 
   static void clear() {

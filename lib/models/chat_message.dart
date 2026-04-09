@@ -1,4 +1,4 @@
-import 'package:emirgpt/models/booking_ai_reply_raw.dart';
+import 'package:emirgpt/models/response/booking_ai_reply_raw.dart';
 
 class ChatMessage {
   final String text;
@@ -27,6 +27,16 @@ class ChatMessage {
   };
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    BookingAiReplyRaw? replyRaw;
+    try {
+      replyRaw = json['replyRaw'] != null
+          ? BookingAiReplyRaw.fromJson(json['replyRaw'])
+          : null;
+    } catch (e) {
+      // If parsing fails, set to null to avoid crashes
+      replyRaw = null;
+    }
+
     return ChatMessage(
       text: json['text'] ?? '',
       isUser: json['isUser'] ?? false,
@@ -35,9 +45,7 @@ class ChatMessage {
           : DateTime.now(),
       isThinking: json['isThinking'] ?? false,
       isAnswered: json['isAnswered'] ?? false,
-      replyRaw: json['replyRaw'] != null
-          ? BookingAiReplyRaw.fromJson(json['replyRaw'])
-          : null,
+      replyRaw: replyRaw,
     );
   }
 

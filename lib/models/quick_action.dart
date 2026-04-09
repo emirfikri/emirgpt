@@ -1,6 +1,6 @@
 class QuickAction {
-  final List<String>? quickAction;
-  final List<String>? quickSend;
+  final String? quickAction;
+  final String? quickSend;
 
   QuickAction({required this.quickAction, required this.quickSend});
 
@@ -11,12 +11,12 @@ class QuickAction {
 
   factory QuickAction.fromJson(Map<String, dynamic> json) {
     return QuickAction(
-      quickAction: json['quickAction'] as List<String>?,
-      quickSend: json['quickSend'] as List<String>?,
+      quickAction: json['quickAction'] as String?,
+      quickSend: json['quickSend'] as String?,
     );
   }
 
-  QuickAction copyWith({List<String>? quickAction, List<String>? quickSend}) {
+  QuickAction copyWith({String? quickAction, String? quickSend}) {
     return QuickAction(
       quickAction: quickAction ?? this.quickAction,
       quickSend: quickSend ?? this.quickSend,

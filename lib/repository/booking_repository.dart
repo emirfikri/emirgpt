@@ -16,4 +16,8 @@ class BookingRepository {
   ) {
     return bookingApiClient.sendConfirmBooking(venuePromptConfirmation);
   }
+
+  Future<List<BookingHistory>> getBookingHistory(User user) {
+    return bookingApiClient.getBookingHistory(user: user);
+  }
 }

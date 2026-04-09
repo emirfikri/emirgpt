@@ -8,17 +8,37 @@ import '../blocs/export_blocs.dart';
 import 'widgets/booking_summary_card.dart';
 import 'widgets/prompt_chip.dart';
 import 'widgets/thinking_indicator.dart';
+import 'widgets/quick_action.dart';
 
-class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+class BookingChatPage extends StatefulWidget {
+  final ScrollController? scrollController;
+
+  const BookingChatPage({super.key, this.scrollController});
 
   @override
-  State<BookingPage> createState() => _BookingPageState();
+  State<BookingChatPage> createState() => _BookingChatPageState();
 }
 
-class _BookingPageState extends State<BookingPage> {
+class _BookingChatPageState extends State<BookingChatPage> {
   final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
+  late final bool _ownsScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownsScrollController = widget.scrollController == null;
+    _scrollController = widget.scrollController ?? ScrollController();
+  }
+
+  @override
+  void dispose() {
+    if (_ownsScrollController) {
+      _scrollController.dispose();
+    }
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +60,7 @@ class _BookingPageState extends State<BookingPage> {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () {
-              context.read<BookingCubit>().clearHistory();
+              context.read<BookingChatCubit>().clearHistory();
             },
           ),
         ],
@@ -48,7 +68,7 @@ class _BookingPageState extends State<BookingPage> {
       body: Column(
         children: [
           Expanded(
-            child: BlocBuilder<BookingCubit, BookingChatState>(
+            child: BlocBuilder<BookingChatCubit, BookingChatState>(
               builder: (context, state) {
                 final messages = state.messages;
 
@@ -79,7 +99,7 @@ class _BookingPageState extends State<BookingPage> {
                               text:
                                   'Book me badminton courts for tommorrow 5pm',
                               onTap: () {
-                                context.read<BookingCubit>().sendMessage(
+                                context.read<BookingChatCubit>().sendMessage(
                                   'Book me badminton courts for tommorrow 5pm',
                                 );
                               },
@@ -88,7 +108,7 @@ class _BookingPageState extends State<BookingPage> {
                               text:
                                   'How is my data Process for using this app ?',
                               onTap: () {
-                                context.read<BookingCubit>().sendMessage(
+                                context.read<BookingChatCubit>().sendMessage(
                                   'How is my data Process for using this app ?',
                                 );
                               },
@@ -96,7 +116,7 @@ class _BookingPageState extends State<BookingPage> {
                             PromptChip(
                               text: 'Book me a futsal court in next hour',
                               onTap: () {
-                                context.read<BookingCubit>().sendMessage(
+                                context.read<BookingChatCubit>().sendMessage(
                                   'Book me a futsal court in next hour',
                                 );
                               },
@@ -108,7 +128,7 @@ class _BookingPageState extends State<BookingPage> {
                   );
                 }
 
-                return BlocListener<BookingCubit, BookingChatState>(
+                return BlocListener<BookingChatCubit, BookingChatState>(
                   listener: (context, state) {
                     if (_scrollController.hasClients) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,7 +149,7 @@ class _BookingPageState extends State<BookingPage> {
                       final isUser = msg.isUser;
                       final isThinking = msg.isThinking;
                       final replyRaw = msg.replyRaw;
-
+                      final suggestedSlots = replyRaw?.suggestedSlots;
                       return Align(
                         alignment: isUser
                             ? Alignment.centerRight
@@ -154,8 +174,10 @@ class _BookingPageState extends State<BookingPage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : isThinking
+                                  : isThinking && messages.last == msg
                                   ? thinkingIndicator()
+                                  : isThinking
+                                  ? const Text('unable to load response')
                                   : replyRaw?.venuePromptConfirmation != null
                                   ? Padding(
                                       padding: const EdgeInsets.only(
@@ -190,13 +212,17 @@ class _BookingPageState extends State<BookingPage> {
                                                         ),
                                                     onPressed: () {
                                                       context
-                                                          .read<BookingCubit>()
+                                                          .read<
+                                                            BookingChatCubit
+                                                          >()
                                                           .sendConfirmBooking(
                                                             replyRaw
                                                                 .venuePromptConfirmation!,
                                                           );
                                                       context
-                                                          .read<BookingCubit>()
+                                                          .read<
+                                                            BookingChatCubit
+                                                          >()
                                                           .updateMessagesIndex(
                                                             index,
                                                           );
@@ -216,7 +242,9 @@ class _BookingPageState extends State<BookingPage> {
                                                         ),
                                                     onPressed: () {
                                                       context
-                                                          .read<BookingCubit>()
+                                                          .read<
+                                                            BookingChatCubit
+                                                          >()
                                                           .updateMessagesIndex(
                                                             index,
                                                           );
@@ -259,6 +287,27 @@ class _BookingPageState extends State<BookingPage> {
                                       ],
                                     ),
                               const SizedBox(height: 4),
+                              suggestedSlots != null &&
+                                      suggestedSlots.suggestedSlots.isNotEmpty
+                                  ? Container(
+                                      margin: const EdgeInsets.only(
+                                        left: 40,
+                                        top: 8,
+                                      ),
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 4,
+                                        children: suggestedSlots.suggestedSlots
+                                            .map((slot) {
+                                              return QuickActionWidget(
+                                                suggestedSlot: slot,
+                                              );
+                                            })
+                                            .toList(),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                              const SizedBox(height: 4),
                               isThinking
                                   ? const SizedBox.shrink()
                                   : Text(
@@ -281,9 +330,9 @@ class _BookingPageState extends State<BookingPage> {
             ),
           ),
 
-          BlocBuilder<BookingCubit, BookingChatState>(
+          BlocBuilder<BookingChatCubit, BookingChatState>(
             builder: (context, state) {
-              if (state is BookingError) {
+              if (state is BookingChatError) {
                 return Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
@@ -296,7 +345,7 @@ class _BookingPageState extends State<BookingPage> {
                       const SizedBox(width: 8),
                       TextButton(
                         onPressed: () {
-                          context.read<BookingCubit>().retry();
+                          context.read<BookingChatCubit>().retry();
                         },
                         child: const Text('Retry'),
                       ),
@@ -308,7 +357,7 @@ class _BookingPageState extends State<BookingPage> {
             },
           ),
 
-          BlocBuilder<BookingCubit, BookingChatState>(
+          BlocBuilder<BookingChatCubit, BookingChatState>(
             builder: (context, state) {
               if (state is BookingLoading) {
                 return const Padding(
@@ -320,7 +369,7 @@ class _BookingPageState extends State<BookingPage> {
             },
           ),
 
-          BlocBuilder<BookingCubit, BookingChatState>(
+          BlocBuilder<BookingChatCubit, BookingChatState>(
             builder: (context, state) {
               final isEmpty = state.messages.isEmpty;
 
@@ -346,7 +395,7 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildInputBar(BuildContext context) {
-    final isLoading = context.watch<BookingCubit>().state is BookingLoading;
+    final isLoading = context.watch<BookingChatCubit>().state is BookingLoading;
 
     return Row(
       children: [
@@ -361,7 +410,7 @@ class _BookingPageState extends State<BookingPage> {
                     !event.isShiftPressed) {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
-                    context.read<BookingCubit>().sendMessage(text);
+                    context.read<BookingChatCubit>().sendMessage(text);
                     Future.delayed(Duration.zero, () => _controller.clear());
                   }
                 }
@@ -388,7 +437,7 @@ class _BookingPageState extends State<BookingPage> {
               : () {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
-                    context.read<BookingCubit>().sendMessage(text);
+                    context.read<BookingChatCubit>().sendMessage(text);
                     _controller.clear();
                   }
                 },

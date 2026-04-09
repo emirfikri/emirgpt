@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'blocs/export_blocs.dart';
 import 'core/app_router.dart';
 import 'core/network/export_api.dart';
+import 'firebase_options.dart';
 import 'repository/export_repository.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
   usePathUrlStrategy();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -22,7 +26,15 @@ class MyApp extends StatelessWidget {
 
         /// Booking Venue
         BlocProvider(
-          create: (_) => BookingCubit(BookingRepository(BookingApiClient())),
+          create: (_) =>
+              BookingChatCubit(BookingRepository(BookingApiClient())),
+        ),
+
+        BlocProvider(
+          create: (_) => BookingListCubit(
+            BookingRepository(BookingApiClient()),
+            BookingApiClient(),
+          ),
         ),
 
         /// Resume Matcher

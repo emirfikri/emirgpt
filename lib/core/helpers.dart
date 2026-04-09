@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Helpers {
@@ -15,6 +16,14 @@ class Helpers {
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
+  }
+
+  static String formatDateTime(DateTime dateTime) {
+    return '${formatDate(dateTime)} ${formatTime(dateTime)}';
+  }
+
+  static String formatDateWithMonthName(DateTime date) {
+    return DateFormat('d MMMM').format(date);
   }
 
   static void openLink(String? href) {

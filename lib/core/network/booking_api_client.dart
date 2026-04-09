@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:emirgpt/models/export_models.dart';
 import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingApiClient {
   static const _baseUrl = 'http://localhost:3000';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<BookingAiReplyRaw> sendMessage(String message) async {
     final response = await http.post(
@@ -43,5 +45,23 @@ class BookingApiClient {
 
     final data = BookingConfirmResponse.fromJson(jsonDecode(response.body));
     return data;
+  }
+
+  Future<List<BookingHistory>> getBookingHistory({required User user}) async {
+    try {
+      final snapshot = await _firestore
+          .collection('bookings')
+          .where('userId', isEqualTo: user.userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+      print(
+        ' Fetched ${snapshot.docs.length} booking history ${snapshot.docs.map((doc) => doc.data()).toList()}',
+      );
+      return snapshot.docs
+          .map((doc) => BookingHistory.fromJson({...doc.data(), 'id': doc.id}))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch booking history: $e');
+    }
   }
 }

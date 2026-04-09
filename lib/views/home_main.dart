@@ -1,10 +1,44 @@
+import 'package:flutter/rendering.dart';
+
 import 'export_pages.dart';
 import 'package:flutter/material.dart';
 
 import '../blocs/export_blocs.dart';
 
-class HomeMainPage extends StatelessWidget {
+class HomeMainPage extends StatefulWidget {
   const HomeMainPage({Key? key}) : super(key: key);
+
+  @override
+  State<HomeMainPage> createState() => _HomeMainPageState();
+}
+
+class _HomeMainPageState extends State<HomeMainPage> {
+  late ScrollController _scrollController;
+  bool _showBottomNav = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final direction = _scrollController.position.userScrollDirection;
+
+    if (direction == ScrollDirection.reverse && _showBottomNav) {
+      setState(() => _showBottomNav = false);
+    } else if (direction == ScrollDirection.forward && !_showBottomNav) {
+      setState(() => _showBottomNav = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +48,33 @@ class HomeMainPage extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             body: _buildBody(state.currentIndex),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: state.currentIndex,
-              onTap: (index) {
-                context.read<HomeMainCubit>().changeIndex(index);
-              },
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Settings',
-                ),
-              ],
+            bottomNavigationBar: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: _showBottomNav ? kBottomNavigationBarHeight : 0,
+              child: Wrap(
+                children: [
+                  SizedBox(
+                    height: _showBottomNav ? kBottomNavigationBarHeight : 0,
+                    child: BottomNavigationBar(
+                      currentIndex: state.currentIndex,
+                      onTap: (index) {
+                        _showBottomNav = true;
+                        context.read<HomeMainCubit>().changeIndex(index);
+                      },
+                      items: const [
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home),
+                          label: 'Home',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.list_alt),
+                          label: 'Bookings',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -36,11 +85,11 @@ class HomeMainPage extends StatelessWidget {
   Widget _buildBody(int index) {
     switch (index) {
       case 0:
-        return const BookingPage();
+        return BookingChatPage(scrollController: _scrollController);
       case 1:
-        return const BookingListPage();
+        return BookingListPage(scrollController: _scrollController);
       default:
-        return const BookingPage();
+        return BookingChatPage(scrollController: _scrollController);
     }
   }
 }
