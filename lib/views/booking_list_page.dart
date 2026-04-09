@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:emirgpt/blocs/export_blocs.dart';
 import 'package:emirgpt/core/helpers.dart';
 
+import '../models/export_models.dart' show BookingHistory;
+
 class BookingListPage extends StatefulWidget {
   final ScrollController? scrollController;
 
@@ -11,14 +13,36 @@ class BookingListPage extends StatefulWidget {
   State<BookingListPage> createState() => _BookingListPageState();
 }
 
-class _BookingListPageState extends State<BookingListPage> {
+class _BookingListPageState extends State<BookingListPage>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+  final List<String> _statuses = ['confirmed', 'completed', 'cancelled'];
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+
     // Load booking history when page initializes
     context.read<BookingListCubit>().initializeWithUser();
-
     context.read<BookingListCubit>().loadBookingHistory();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  List<BookingHistory> _getFilteredBookings(
+    List<BookingHistory> bookings,
+    String status,
+  ) {
+    return bookings
+        .where(
+          (booking) => booking.status.toLowerCase() == status.toLowerCase(),
+        )
+        .toList();
   }
 
   @override
@@ -88,62 +112,213 @@ class _BookingListPageState extends State<BookingListPage> {
           );
         }
 
-        // Show booking list
-        return RefreshIndicator(
-          onRefresh: () =>
-              context.read<BookingListCubit>().refreshBookingHistory(),
-          child: ListView.builder(
-            controller: widget.scrollController,
-            padding: const EdgeInsets.all(16),
-            itemCount: state.bookingHistory.length,
-            itemBuilder: (context, index) {
-              final booking = state.bookingHistory[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                elevation: 2,
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(booking.status),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      _getStatusIcon(booking.status),
-                      color: Colors.white,
-                    ),
-                  ),
-                  title: Text(
-                    booking.venueName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        return Column(
+          children: [
+            // TabBar
+            TabBar(
+              controller: _tabController,
+              labelColor: Colors.blue,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.blue,
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 4),
-                      Text(
-                        Helpers.formatDateWithMonthName(booking.bookingDate),
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      Text(
-                        'Status: ${booking.status}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _getStatusColor(booking.status),
-                          fontWeight: FontWeight.w500,
+                      const Icon(Icons.check_circle),
+                      const SizedBox(width: 8),
+                      const Text('Confirmed'),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getFilteredBookings(
+                            state.bookingHistory,
+                            'confirmed',
+                          ).length.toString(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: navigate to booking details
-                  },
                 ),
-              );
-            },
-          ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.done_all),
+                      const SizedBox(width: 8),
+                      const Text('Completed'),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getFilteredBookings(
+                            state.bookingHistory,
+                            'completed',
+                          ).length.toString(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.cancel),
+                      const SizedBox(width: 8),
+                      const Text('Cancelled'),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getFilteredBookings(
+                            state.bookingHistory,
+                            'cancelled',
+                          ).length.toString(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // TabView
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: _statuses.map((status) {
+                  final filteredBookings = _getFilteredBookings(
+                    state.bookingHistory,
+                    status,
+                  );
+
+                  if (filteredBookings.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            status == 'confirmed'
+                                ? Icons.check_circle_outline
+                                : status == 'completed'
+                                ? Icons.done_all_outlined
+                                : Icons.cancel_outlined,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No ${status} bookings',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () => context
+                        .read<BookingListCubit>()
+                        .refreshBookingHistory(),
+                    child: ListView.builder(
+                      controller: widget.scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredBookings.length,
+                      itemBuilder: (context, index) {
+                        final booking = filteredBookings[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          elevation: 2,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: Container(
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(booking.status),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(
+                                _getStatusIcon(booking.status),
+                                color: Colors.white,
+                              ),
+                            ),
+                            title: Text(
+                              booking.venueName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  Helpers.formatDateTime(booking.startDate),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                Text(
+                                  'Status: ${booking.status}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: _getStatusColor(booking.status),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              // TODO: navigate to booking details
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         );
       },
     );

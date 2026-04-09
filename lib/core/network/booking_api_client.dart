@@ -54,9 +54,6 @@ class BookingApiClient {
           .where('userId', isEqualTo: user.userId)
           .orderBy('createdAt', descending: true)
           .get();
-      print(
-        ' Fetched ${snapshot.docs.length} booking history ${snapshot.docs.map((doc) => doc.data()).toList()}',
-      );
       return snapshot.docs
           .map((doc) => BookingHistory.fromJson({...doc.data(), 'id': doc.id}))
           .toList();

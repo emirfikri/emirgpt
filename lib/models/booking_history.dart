@@ -3,7 +3,7 @@ class BookingHistory {
   final String userId;
   final String venueName;
   final String venueId;
-  final DateTime bookingDate;
+  final DateTime startDate;
   final DateTime createdAt;
   final String status; // 'confirmed', 'completed', 'cancelled'
   final Map<String, dynamic>? details;
@@ -13,7 +13,7 @@ class BookingHistory {
     required this.userId,
     required this.venueName,
     required this.venueId,
-    required this.bookingDate,
+    required this.startDate,
     required this.createdAt,
     this.status = 'confirmed',
     this.details,
@@ -25,7 +25,7 @@ class BookingHistory {
       userId: json['userId'] as String,
       venueName: json['venueName'] as String,
       venueId: json['venueId'] as String,
-      bookingDate: _parseDateTime(json['bookingDate']),
+      startDate: _parseDateTime(json['startDate']),
       createdAt: _parseDateTime(json['createdAt']),
       status: json['status'] as String? ?? 'confirmed',
       details: json['details'] as Map<String, dynamic>?,
@@ -62,7 +62,7 @@ class BookingHistory {
     'userId': userId,
     'venueName': venueName,
     'venueId': venueId,
-    'bookingDate': bookingDate.toIso8601String(),
+    'startDate': startDate.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
     'status': status,
     'details': details,
@@ -73,7 +73,7 @@ class BookingHistory {
     String? userId,
     String? venueName,
     String? venueId,
-    DateTime? bookingDate,
+    DateTime? startDate,
     DateTime? createdAt,
     String? status,
     Map<String, dynamic>? details,
@@ -83,7 +83,7 @@ class BookingHistory {
       userId: userId ?? this.userId,
       venueName: venueName ?? this.venueName,
       venueId: venueId ?? this.venueId,
-      bookingDate: bookingDate ?? this.bookingDate,
+      startDate: startDate ?? this.startDate,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
       details: details ?? this.details,
