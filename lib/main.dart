@@ -30,6 +30,8 @@ class MyApp extends StatelessWidget {
               BookingChatCubit(BookingRepository(BookingApiClient())),
         ),
 
+        BlocProvider(create: (_) => HomeMainCubit()),
+
         BlocProvider(
           create: (_) => BookingListCubit(
             BookingRepository(BookingApiClient()),

@@ -18,7 +18,7 @@ class _BookingSplashPageState extends State<BookingSplashPage> {
   void _navigateToBooking() {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
-        context.go('/booking-main');
+        context.go('/home/chat');
       }
     });
   }

@@ -4,6 +4,10 @@ class HomeMainCubit extends Cubit<HomeMainState> {
   HomeMainCubit() : super(const HomeInitial());
 
   void changeIndex(int index) {
-    emit(HomeChangeState(index));
+    emit(HomeChangeState(index, state.showBottomNav));
+  }
+
+  void toggleBottomNav(bool show) {
+    emit(HomeChangeState(state.currentIndex, show));
   }
 }
